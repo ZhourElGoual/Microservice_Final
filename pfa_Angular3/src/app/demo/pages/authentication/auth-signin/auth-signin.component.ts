@@ -30,7 +30,11 @@ export class AuthSigninComponent {
 
   email() { return this.loginForm.get('email'); }
   password() { return this.loginForm.get('password'); }
+showPassword = false;
 
+togglePasswordVisibility() {
+  this.showPassword = !this.showPassword;
+}
 onSubmit() {
   this.submitted = true;
 
