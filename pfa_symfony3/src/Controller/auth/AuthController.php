@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\auth\Mapper\UserMapper;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
@@ -16,6 +17,7 @@ class AuthController extends AbstractController
     private IUser $userRepository;
     private JWTTokenManagerInterface $jwtManager;
     private UserPasswordHasherInterface $passwordHasher;
+
     public function __construct(
         IUser $userRepository,
         JWTTokenManagerInterface $jwtManager,
@@ -32,26 +34,36 @@ class AuthController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         if (!$data || !isset($data['email'], $data['password'])) {
-            return new JsonResponse(['message' => 'Email et mot de passe requis'], 400);
+            return new JsonResponse(
+                ['message' => 'Email et mot de passe requis'],
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
-      $user = $this->userRepository->login($data['email'], $data['password'], $this->passwordHasher);
+        $user = $this->userRepository->login(
+            $data['email'],
+            $data['password'],
+            $this->passwordHasher
+        );
 
-            if (!$user) {
-                return new JsonResponse([
-                    'authenticated' => false,
-                    'message' => 'Identifiants invalides'
-                ], 401);
-            }
-            $token = $this->jwtManager->create($user);
-            $loginDTO = UserMapper::toLoginResponse($user, $token);
+        if (!$user) {
             return new JsonResponse([
-                'authenticated' => $loginDTO->authenticated,
-                'token' => $loginDTO->token,
-                'id' => $loginDTO->id,
-                'email' => $loginDTO->email,
-                'role' => $loginDTO->role
-            ]);
+                'authenticated' => false,
+                'message' => 'Identifiants invalides'
+            ], Response::HTTP_UNAUTHORIZED);
+        }
 
-            }
+        $token = $this->jwtManager->create($user);
+        $loginDTO = UserMapper::toLoginResponse($user, $token);
+
+        return new JsonResponse([
+            'authenticated' => $loginDTO->authenticated,
+            'token' => $loginDTO->token,
+            'id' => $loginDTO->id,
+            'email' => $loginDTO->email,
+            'role' => $loginDTO->role,
+            'nom'=> $loginDTO->nom,
+            'prenom'=> $loginDTO->prenom,
+        ], Response::HTTP_OK);
+    }
 }

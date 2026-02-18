@@ -45,7 +45,13 @@ onSubmit() {
         const role = res.role;
 
         // stocke token, rôle et id dans AuthService
-        this.auth.setAuth(res.token, role, res.id);
+       this.auth.setAuth(
+          res.token,
+          role,
+          res.id,
+          res.nom,
+          res.prenom
+        );
 
         // redirection selon rôle
         if (role.toLowerCase() === 'admin') {

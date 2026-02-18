@@ -9,13 +9,13 @@ import { NavSearchComponent } from './nav-left/nav-search/nav-search.component';
 
 @Component({
   selector: 'app-nav-bar',
-  standalone: true, // ⚠️ IMPORTANT
+  standalone: true,  
   imports: [
     CommonModule,
     RouterModule,
     SharedModule,
     NavLeftComponent,
-    NavSearchComponent, // ✅ AJOUT ICI
+    NavSearchComponent, 
     NavRightComponent
   ],
   templateUrl: './nav-bar.component.html',

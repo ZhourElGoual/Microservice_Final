@@ -4,13 +4,14 @@ import { RouterOutlet } from '@angular/router';
 import { NavSearchComponent } from './nav-bar/nav-left/nav-search/nav-search.component';
 import screenfull from 'screenfull';
 import { CommonModule } from '@angular/common';
+import { NavRightComponent } from "./nav-bar/nav-right/nav-right.component";
 
 
 
 @Component({
   selector: 'app-admin',
   standalone: true,
-  imports: [SimpleNavComponent, RouterOutlet, NavSearchComponent, CommonModule],
+  imports: [SimpleNavComponent, RouterOutlet, NavSearchComponent, CommonModule, NavRightComponent],
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss']
 })

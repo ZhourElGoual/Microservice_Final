@@ -1,5 +1,6 @@
 <?php
 namespace App\Controller\admin;
+
 use App\DTO\client\ClientSearchDTO;
 use App\Repository\client\Iclient;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -8,7 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Mapper\client\ClientMapper;
 
-
 class CrudUseController extends AbstractController
 {
     #[Route('/clients', name: 'clients_list', methods: ['GET'])]
@@ -16,11 +16,8 @@ class CrudUseController extends AbstractController
     {
         $clientsArray = $clientRepo->getAllClients();
 
-        return $this->json([
-            'success' => true,
-            'count' => count($clientsArray),
-            'clients' => $clientsArray
-        ]);
+      return $this->json($clientsArray, Response::HTTP_OK);
+
     }
 
     #[Route('/client/ajouter', name: 'client_ajouter', methods: ['POST'])]
@@ -33,9 +30,11 @@ class CrudUseController extends AbstractController
             if ($photo) {
                 $filename = uniqid() . '.' . $photo->guessExtension();
                 $uploadDir = $this->getParameter('kernel.project_dir') . '/public/uploads';
+                
                 if (!is_writable($uploadDir)) {
                     throw new \Exception('Le dossier uploads n’est pas accessible en écriture');
                 }
+
                 $photo->move($uploadDir, $filename);
                 $data['photoProfil'] = $filename;
             }
@@ -45,9 +44,13 @@ class CrudUseController extends AbstractController
             return $this->json([
                 'message' => 'Client ajouté avec succès ✅',
                 'id' => $client->getId()
-            ]);
+            ], Response::HTTP_CREATED);
+
         } catch (\Throwable $e) {
-            return $this->json(['error' => $e->getMessage()], 500);
+            return $this->json(
+                ['error' => $e->getMessage()],
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 
@@ -57,10 +60,16 @@ class CrudUseController extends AbstractController
         $client = $clientRepo->getClientById($id);
 
         if (!$client) {
-            return $this->json(['message' => 'Client non trouvé'], 404);
+            return $this->json(
+                ['message' => 'Client non trouvé'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        return $this->json(ClientMapper::toArray($client));
+        return $this->json(
+            ClientMapper::toArray($client),
+            Response::HTTP_OK
+        );
     }
 
     #[Route('/client/supprimer/{id}', name: 'client_supprimer', methods: ['POST','GET'], requirements: ['id' => '\d+'])]
@@ -69,28 +78,31 @@ class CrudUseController extends AbstractController
         $client = $clientRepo->getClientById($id);
 
         if (!$client) {
-            return $this->json(['message' => 'Client non trouvé'], 404);
+            return $this->json(
+                ['message' => 'Client non trouvé'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
         $clientRepo->supprimerClient($client);
 
         return $this->json([
             'message' => 'Client supprimé avec succès ✅',
-        ]);
+        ], Response::HTTP_OK);
     }
 
-    #[Route('/client/search', name: 'client_search')]
-    public function search(Request $request, Iclient $clientRepo): Response
-    {
-        $motCle = $request->query->get('q', '');
-        $dto = new ClientSearchDTO();
-        $dto->motCle = $motCle;
+    // #[Route('/client/search', name: 'client_search', methods: ['GET'])]
+    // public function search(Request $request, Iclient $clientRepo): Response
+    // {
+    //     $motCle = $request->query->get('q', '');
+    //     $dto = new ClientSearchDTO();
+    //     $dto->motCle = $motCle;
 
-        $clientsArray = $clientRepo->rechercheClient($dto);
+    //     $clientsArray = $clientRepo->rechercheClient($dto);
 
-        return $this->json([
-            'success' => true,
-            'clients' => $clientsArray
-        ]);
-    }
+    //     return $this->json([
+    //         'success' => true,
+    //         'clients' => $clientsArray
+    //     ], Response::HTTP_OK);
+    // }
 }

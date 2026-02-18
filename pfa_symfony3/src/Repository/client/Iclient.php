@@ -15,8 +15,10 @@ interface Iclient
     public function ajouterClient(array $data): Client;
     public function getClientById(int $id): ?Client;
     public function supprimerClient(Client $client): void;
-    public function rechercheClient(ClientSearchDTO $dto): array;
-    public function getClientProfile(int $id): ?ClientReadDto;
+    // public function rechercheClient(ClientSearchDTO $dto): array; 
+
+    public function getClientProfile(int $id): ?Client;
+
     public function updateClientProfile(
         int $id,
         ClientUpdateDto $dto,

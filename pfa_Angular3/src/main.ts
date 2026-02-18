@@ -2,7 +2,7 @@ import { enableProdMode, importProvidersFrom } from '@angular/core';
 import { environment } from './environments/environment';
 import { BrowserModule, bootstrapApplication } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { routes } from './app/app.routes';
 import { AppRoutingModule } from './app/app-routing.module';
@@ -18,8 +18,9 @@ bootstrapApplication(AppComponent, {
     importProvidersFrom(BrowserModule, AppRoutingModule),
     provideAnimations(),
     provideRouter(routes),
-    provideHttpClient(),
-      
+    provideHttpClient(withInterceptorsFromDi()),
+
     ...httpInterceptorProviders
   ]
 }).catch(err => console.error(err));
+

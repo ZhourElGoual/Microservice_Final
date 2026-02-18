@@ -7,22 +7,26 @@
   <div class="main">
 
     <!-- NAVBAR TOP FLEX -->
-    <header class="navbar" [class.scrolled]="isScrolled">
+<header class="navbar" [class.scrolled]="isScrolled">
 
-      <!-- LEFT -->
-      <div class="navbar-left">
-        <button class="icon-btn" (click)="toggleFullscreen()">
-  <i class="feather"
-     [ngClass]="screenFull ? 'icon-minimize' : 'icon-maximize'">
-  </i>
-</button>
+  <!-- LEFT -->
+  <div class="navbar-left">
+    <button class="icon-btn" (click)="toggleFullscreen()">
+      <i class="feather"
+         [ngClass]="screenFull ? 'icon-minimize' : 'icon-maximize'">
+      </i>
+    </button>
 
-        <app-nav-search></app-nav-search>
-      </div>
+    <app-nav-search></app-nav-search>
+  </div>
 
-    
+  <!-- RIGHT -->
+  <div class="navbar-right">
+    <app-nav-right></app-nav-right>
+  </div>
 
-    </header>
+</header>
+
 
     <!-- CONTENT -->
     <main class="content">

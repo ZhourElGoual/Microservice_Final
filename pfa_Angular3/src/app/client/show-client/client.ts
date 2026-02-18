@@ -5,6 +5,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchService } from '../../services/search.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { ClientFilterPipe } from "../../pipes/client-filter-pipe";
+
 
 interface Client {
   id: number;
@@ -24,7 +26,7 @@ interface ClientsResponse {
 @Component({
   selector: 'app-client',
   standalone: true,
-  imports: [CommonModule, FormsModule,RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ClientFilterPipe],
   templateUrl: './client.html',
   styleUrls: ['./client.scss'],
 })
@@ -39,6 +41,8 @@ export class ClientComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+
+
   ngOnInit(): void {
     this.loadClients();
     this.SearchService.search$.subscribe(text => {
@@ -47,23 +51,27 @@ export class ClientComponent implements OnInit {
   }
 loadClients(): void {
   this.clientService.getAllClients().subscribe({
-    next: (res: ClientsResponse) => {
-      if (res.success) {
-        this.clients = res.clients;
-        this.cdr.detectChanges(); // 🔥 important
-      }
-    },
-    error: (err) => console.error('Erreur API:', err)
+    next: (res: Client[]) => {
+  this.clients = res;
+}
   });
 }
 
-  filteredClients(): Client[] {
-    return this.clients.filter(client =>
-      client.nom.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      client.prenom.toLowerCase().includes(this.searchText.toLowerCase()) ||
-      client.email.toLowerCase().includes(this.searchText.toLowerCase())
-    );
-  }
+// filteredClients(): Client[] {
+
+//   if (!this.searchText) {
+//     return this.clients;
+//   }
+
+//   const value = this.searchText.toLowerCase();
+
+//   return this.clients.filter(client =>
+//     client.nom.toLowerCase().includes(value) ||
+//     client.prenom.toLowerCase().includes(value) ||
+//     client.email.toLowerCase().includes(value)
+//   );
+// }
+
   voirDetails(id: number): void {
     this.router.navigate(['/clients', id]);
   }

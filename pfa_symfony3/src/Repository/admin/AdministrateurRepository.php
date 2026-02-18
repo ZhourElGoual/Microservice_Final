@@ -4,48 +4,49 @@ namespace App\Repository\admin;
 
 use App\Dto\admin\AdminUpdateDto;
 use App\Entity\admin\Administrateur;
-use App\Mapper\admin\AdminMapper;
 use Doctrine\ORM\EntityManagerInterface;
 
 final class AdministrateurRepository implements Iadministrateur
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private AdminMapper $mapper,
     ) {}
 
-    public function getAdminProfile(int $id): ?array
+    public function getAdminProfile(int $id): ?Administrateur
     {
-        $admin = $this->em->getRepository(Administrateur::class)->find($id);
-        if (!$admin) return null;
-
-        $dto = $this->mapper->toReadDto($admin);
-
-        return [
-            'id' => $dto->user->id,
-            'email' => $dto->user->email,
-            'nom' => $dto->user->nom,
-            'prenom' => $dto->user->prenom,
-            'role' => $dto->user->role,
-        ];
+        return $this->em
+            ->getRepository(Administrateur::class)
+            ->find($id);
     }
 
-    public function updateAdminProfile(int $id, AdminUpdateDto $updateDto): ?array
+    public function updateAdminProfile(int $id, AdminUpdateDto $updateDto): ?Administrateur
     {
-        $admin = $this->em->getRepository(Administrateur::class)->find($id);
-        if (!$admin) return null;
+        $admin = $this->getAdminProfile($id);
 
-        $this->mapper->applyUpdateDto($admin, $updateDto);
+        if (!$admin) {
+            return null;
+        }
+
+        $u = $updateDto->user;
+
+        if ($u->email !== null) {
+            $admin->setEmail($u->email);
+        }
+
+        if ($u->nom !== null) {
+            $admin->setNom($u->nom);
+        }
+
+        if ($u->prenom !== null) {
+            $admin->setPrenom($u->prenom);
+        }
+
+        return $admin;
+    }
+
+
+    public function save(): void
+    {
         $this->em->flush();
-
-        $dto = $this->mapper->toReadDto($admin);
-
-        return [
-            'id' => $dto->user->id,
-            'email' => $dto->user->email,
-            'nom' => $dto->user->nom,
-            'prenom' => $dto->user->prenom,
-            'role' => $dto->user->role,
-        ];
     }
 }

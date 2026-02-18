@@ -10,21 +10,16 @@ use App\Entity\client\Client;
 use App\Mapper\client\ClientMapper;
 use Doctrine\ORM\EntityManagerInterface;
 
+
 class ClientRepository implements Iclient
 {
-    private EntityManagerInterface $em;
-    private ClientProfileMapper $profileMapper;
-
-    public function __construct(EntityManagerInterface $em ,ClientProfileMapper $profileMapper )
-    {
-        $this->em = $em;
-         $this->profileMapper = $profileMapper;
-    }
+    public function __construct(
+        private EntityManagerInterface $em
+    ) {}
 
     public function getAllClients(): array
     {
-        $clients = $this->em->getRepository(Client::class)->findAll();
-        return array_map(fn($c) => ClientMapper::toArray($c), $clients);
+        return $this->em->getRepository(Client::class)->findAll();
     }
 
     public function ajouterClient(array $data): Client
@@ -49,46 +44,63 @@ class ClientRepository implements Iclient
         $this->em->flush();
     }
 
-    public function rechercheClient(ClientSearchDTO $dto): array
+    // public function rechercheClient(ClientSearchDTO $dto): array
+    // {
+    //     return $this->em->getRepository(Client::class)
+    //         ->createQueryBuilder('c')
+    //         ->where('c.nom LIKE :mot')
+    //         ->orWhere('c.prenom LIKE :mot')
+    //         ->orWhere('c.email LIKE :mot')
+    //         ->orWhere('c.cin LIKE :mot')
+    //         ->setParameter('mot', '%' . $dto->motCle . '%')
+    //         ->getQuery()
+    //         ->getResult();
+    // }
+
+    public function getClientProfile(int $id): ?Client
     {
-        $result = $this->em->getRepository(Client::class)
-            ->createQueryBuilder('c')
-            ->where('c.nom LIKE :mot')
-            ->orWhere('c.prenom LIKE :mot')
-            ->orWhere('c.email LIKE :mot')
-            ->orWhere('c.cin LIKE :mot')
-            ->setParameter('mot', '%' . $dto->motCle . '%')
-            ->getQuery()
-            ->getResult();
-
-        return array_map(fn($c) => ClientMapper::toArray($c), $result);
+        return $this->em->getRepository(Client::class)->find($id);
     }
 
+    public function updateClientProfile(
+        int $id,
+        ClientUpdateDto $dto,
+        UserPasswordHasherInterface $hasher
+    ): bool {
 
-    public function getClientProfile(int $id): ?ClientReadDto
-    {
-    $client = $this->em->getRepository(Client::class)->find($id);
-    if (!$client) {
-        return null;
-    }
-
-    return $this->profileMapper->toReadDto($client);
-    }
-
-    public function updateClientProfile(int $id, ClientUpdateDto $dto, UserPasswordHasherInterface $hasher): bool
-{
-    try {
         $client = $this->em->getRepository(Client::class)->find($id);
+
         if (!$client) {
             return false;
         }
-        $this->profileMapper->applyUpdateDto($client, $dto, $hasher);
+
+        if ($dto->nom !== null) {
+            $client->setNom($dto->nom);
+        }
+
+        if ($dto->prenom !== null) {
+            $client->setPrenom($dto->prenom);
+        }
+
+        if ($dto->telephone !== null) {
+            $client->setTelephone($dto->telephone);
+        }
+
+        if ($dto->cin !== null) {
+            $client->setCin($dto->cin);
+        }
+
+        if ($dto->photoProfil !== null) {
+            $client->setPhotoProfil($dto->photoProfil);
+        }
+
+        if ($dto->password !== null) {
+            $hashedPassword = $hasher->hashPassword($client, $dto->password);
+            $client->setPassword($hashedPassword);
+        }
+
         $this->em->flush();
+
         return true;
-    } catch (\Throwable $e) {
-        throw new \Exception("Erreur lors de la mise à jour du profil: " . $e->getMessage());
     }
 }
-
-}
-

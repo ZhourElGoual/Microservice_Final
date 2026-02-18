@@ -13,12 +13,6 @@ export interface Client {
   photoProfil?: string;
 }
 
-// Type pour la réponse backend
-export interface ClientsResponse {
-  success: boolean;
-  count: number;
-  clients: Client[];
-}
 
 @Injectable({
   providedIn: 'root'
@@ -28,9 +22,10 @@ export class ClientService {
 
   constructor(private http: HttpClient) {}
 
-  getAllClients(): Observable<ClientsResponse> {
-    return this.http.get<ClientsResponse>(this.apiUrl);
-  }
+getAllClients(): Observable<Client[]> {
+  return this.http.get<Client[]>(this.apiUrl);
+}
+
 
  deleteClient(id: number): Observable<any> {
   return this.http.post(`http://127.0.0.1:8000/client/supprimer/${id}`,{});

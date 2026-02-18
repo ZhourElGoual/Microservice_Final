@@ -15,7 +15,9 @@ class UserMapper
             $token,
             $user->getId(),
             $user->getEmail(),
-            $user->getRole() 
+            $user->getRole() ,
+            $user->getNom(),    
+            $user->getPrenom()   
         );
     }
 }
